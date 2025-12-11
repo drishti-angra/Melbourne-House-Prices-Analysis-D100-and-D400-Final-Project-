@@ -1,0 +1,29 @@
+name: d100_housing
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+ 
+  - python=3.11.8
+  - pip
+  - pre-commit
+  - pytest>=6  
+  - pytest-cov
+  - setuptools-scm
+  - pandas
+  - numpy
+  - dask-ml
+  - ydata-profiling
+  - ipykernel
+  - matplotlib
+  - nbformat
+  - glum
+  - lightgbm
+  - scikit-learn
+  - dalex
+  - seaborn
+  - jupyter
+  - jupyterlab
+
+  - pip:
+      - xgboost
