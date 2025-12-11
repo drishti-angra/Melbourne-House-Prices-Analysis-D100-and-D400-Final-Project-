@@ -3,11 +3,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
- 
+
   - python=3.11.8
   - pip
   - pre-commit
-  - pytest>=6  
+  - pytest>=6
   - pytest-cov
   - setuptools-scm
   - pandas
@@ -24,6 +24,7 @@ dependencies:
   - seaborn
   - jupyter
   - jupyterlab
+  - seaborn
 
   - pip:
       - xgboost

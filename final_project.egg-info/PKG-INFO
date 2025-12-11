@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: final-project
+Version: 0.1.0
+Summary: House prices final project
+Author-email: Drishti Angra <angra.drishti@gmail.com>
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: scikit-learn
+Provides-Extra: dev
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: flake8; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: isort; extra == "dev"
+Requires-Dist: pre-commit; extra == "dev"
+
+# house_prices_final_project
+Fundamentals of Data Science and Research Computing Combined Project

@@ -1,0 +1,10 @@
+pandas
+numpy
+scikit-learn
+
+[dev]
+mypy
+flake8
+black
+isort
+pre-commit

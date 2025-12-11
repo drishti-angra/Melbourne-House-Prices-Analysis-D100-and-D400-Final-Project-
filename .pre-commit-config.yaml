@@ -7,17 +7,17 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:
-      - id: trailing-whitespace 
+      - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
 
-#Flake 8 code linter 
+#Flake 8 code linter
   - repo: https://github.com/PyCQA/flake8
     rev: 7.1.1
     hooks:
       - id: flake8
- 
+
 
 # Mypy static type checker
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -36,4 +36,4 @@ repos:
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
-    -   id: black           
+    -   id: black
