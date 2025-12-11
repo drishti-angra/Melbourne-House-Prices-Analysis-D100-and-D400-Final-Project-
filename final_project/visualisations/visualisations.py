@@ -1,15 +1,16 @@
+from typing import Optional, List 
+
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
-from pandas import DataFrame
-from typing import Optional
-
-
+import seaborn as sns
+import numpy as np
+from fitter import Fitter 
+import scipy.stats as st
 
 
 
 def plot_histogram(
-    df: DataFrame,
+    df: pd.DataFrame,
     column: str,
     bins: int = 30,
     title: Optional[str] = None,
@@ -48,4 +49,26 @@ def plot_histogram(
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.grid(axis="y", alpha=0.3)
+    plt.show()
+
+
+def plot_distribution(
+    df: pd.DataFrame,
+    column: str,
+    dist: Optional[List[str]] = None,
+) -> None:
+    """
+    Plots a fit of the target variable against a list of distributions.
+
+    Args:
+        df (pd.DataFrame): pandas DataFrame
+        column (str): column to analyse
+        dist (list[str], optional): list of distributions to fit.
+            If None, all distributions available in `fitter` are used.
+    """
+    f = Fitter(df[column].to_numpy(), distributions=dist)
+    plt.figure(figsize=(10, 8))
+    f.fit()
+    plt.title(f"Distribution of {column}, best fit: {f.get_best()}")
+    f.summary()
     plt.show()

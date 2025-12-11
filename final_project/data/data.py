@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pandas as pd
 
 raw_data = Path(__file__).resolve().parents[2] / "data" / "raw_data.csv"
@@ -6,7 +7,7 @@ raw_data = Path(__file__).resolve().parents[2] / "data" / "raw_data.csv"
 def load_data() -> pd.DataFrame:
     """Load raw data from raw_data.csv.
 
-    Returns: 
+    Returns:
         pd.DataFrame: Raw data as a pandas DataFrame
 
     """
@@ -15,23 +16,23 @@ def load_data() -> pd.DataFrame:
     return df
 
 
-
 def summarise_data(df: pd.DataFrame) -> pd.DataFrame:
     """Return a summary table describing each column of the DataFrame."""
-    
-    summary = pd.DataFrame({
-        "dtype": df.dtypes,
-        "n_missing": df.isna().sum(),
-        "pct_missing": df.isna().mean().round(3),
-        "n_unique": df.nunique(),
-        "max": df.max(numeric_only=True),
-        "min": df.min(numeric_only=True),
-        "mean": df.mean(numeric_only=True),
-        "median": df.median(numeric_only=True),
-        "std": df.std(numeric_only=True)
-        
-    })
-    
+
+    summary = pd.DataFrame(
+        {
+            "dtype": df.dtypes,
+            "n_missing": df.isna().sum(),
+            "pct_missing": df.isna().mean().round(3),
+            "n_unique": df.nunique(),
+            "max": df.max(numeric_only=True),
+            "min": df.min(numeric_only=True),
+            "mean": df.mean(numeric_only=True),
+            "median": df.median(numeric_only=True),
+            "std": df.std(numeric_only=True),
+        }
+    )
+
     return summary
 
 

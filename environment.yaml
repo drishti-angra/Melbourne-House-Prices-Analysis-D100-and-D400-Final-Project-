@@ -24,7 +24,8 @@ dependencies:
   - seaborn
   - jupyter
   - jupyterlab
-  - seaborn
+  - scipy
 
   - pip:
       - xgboost
+      - fitter
