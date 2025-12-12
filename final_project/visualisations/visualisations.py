@@ -300,3 +300,91 @@ def plot_kde(
 
     plt.tight_layout()
     plt.show()
+
+
+def plot_faceted_kde(
+    df: pd.DataFrame,
+    numeric_col: str,
+    facet_col: str,
+    col_wrap: int = 4,
+    height: float = 2.5,
+    aspect: float = 1.2,
+) -> None:
+    """
+    Plot faceted KDE distributions of a numeric variable, split by a categorical variable.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        numeric_col (str): Numeric column to plot (e.g. YearBuilt).
+        facet_col (str): Categorical column to facet by (e.g. CouncilArea).
+        col_wrap (int, optional): Number of facets per row. Default is 4.
+        height (float, optional): Height of each facet. Default is 2.5.
+        aspect (float, optional): Aspect ratio of each facet. Default is 1.2.
+    """
+    sns.displot(
+        data=df.dropna(subset=[numeric_col]),
+        x=numeric_col,
+        col=facet_col,
+        col_wrap=col_wrap,
+        kind="kde",
+        fill=True,
+        height=height,
+        aspect=aspect,
+
+    )
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_missing_proportion(
+    df: pd.DataFrame,
+    group_col: str,
+    missing_col: str,
+    title: Optional[str] = None,
+) -> None:
+    """
+    Plot the proportion of missing values in a column, grouped by another column.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        group_col (str): Column to group by (e.g. CouncilArea).
+        missing_col (str): Binary missingness indicator (e.g. Missing_YearBuilt).
+        title (str, optional): Plot title.
+    """
+    prop_missing = (
+        df.groupby(group_col)[missing_col]
+        .mean()
+        .sort_values(ascending=False)
+    )
+
+    plt.figure(figsize=(12, 5))
+    prop_missing.plot(kind="bar")
+
+    plt.ylim(0, 1)
+    plt.ylabel("Proportion Missing")
+    plt.xlabel(group_col)
+    plt.title(title or f"Proportion of Missing {missing_col.replace('Missing_', '')} by {group_col}")
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_size_pairplot(
+    df: pd.DataFrame,
+    columns: list[str],
+) -> None:
+    """
+    Plot pairwise scatter plots (and histograms on the diagonal)
+    for selected size-related features.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        columns (list[str]): Columns to include in the pairplot.
+    """
+    sns.pairplot(
+        df[columns].dropna(),
+        diag_kind="hist"
+    )
+
+    plt.show()
