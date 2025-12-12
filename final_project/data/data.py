@@ -75,3 +75,78 @@ def float_to_integer(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """Convert a float column to an integer column."""
     df[column] = df[column].astype("Int64")
     return df
+
+import pandas as pd
+
+
+
+def add_missing_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    For every column in the dataframe that contains missing values,
+    create a new indicator feature called 'Missing_<column>'.
+
+    The indicator is:
+        1 if the value is missing
+        0 otherwise
+
+    The function returns a new dataframe with added columns.
+    """
+
+    df = df.copy()  # do not overwrite original unless intended
+
+    for col in df.columns:
+        if df[col].isna().any():   # only for columns with missing values
+            df[f"Missing_{col}"] = df[col].isna().astype(int)
+
+    return df
+
+import pandas as pd
+
+
+
+
+def impute_council_from_suburb(
+    df: pd.DataFrame,
+    suburb_col: str = "Suburb",
+    council_col: str = "CouncilArea",
+    unavailable_label: str = "Unavailable",
+) -> pd.DataFrame:
+    """
+    Impute missing council values using suburb-to-council relationships
+    learned from existing data. Remaining missing councils are set to 'Unavailable'.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe.
+    suburb_col : str, optional
+        Name of the suburb column. Default is 'Suburb'.
+    council_col : str, optional
+        Name of the council column. Default is 'CouncilArea'.
+    unknown_label : str, optional
+        Label used when council cannot be inferred. Default is 'Unavailable'.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with CouncilArea imputed.
+    """
+    df_imputed = df.copy()
+
+    # Build Suburb -> Council mapping from non-missing values
+    suburb_to_council = (
+        df_imputed.loc[df_imputed[council_col].notna(), [suburb_col, council_col]]
+        .groupby(suburb_col)[council_col]
+        .agg(lambda x: x.mode().iloc[0])
+    )
+
+    # Impute missing councils using suburb mapping
+    missing_mask = df_imputed[council_col].isna()
+    df_imputed.loc[missing_mask, council_col] = (
+        df_imputed.loc[missing_mask, suburb_col].map(suburb_to_council)
+    )
+
+    # Any councils still missing -> Unavailable
+    df_imputed[council_col] = df_imputed[council_col].fillna(unavailable_label)
+
+    return df_imputed
