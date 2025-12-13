@@ -5,6 +5,7 @@ import pandas as pd
 
 raw_data = Path(__file__).resolve().parents[2] / "data" / "raw_data.csv"
 
+
 def load_data() -> pd.DataFrame:
     """Load raw data from raw_data.csv.
 
@@ -166,3 +167,15 @@ def drop_columns(df: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
         pd.DataFrame: DataFrame with columns removed.
     """
     return df.drop(columns=list(columns))
+
+
+cleaned_data = Path(__file__).resolve().parents[2] / "data" / "cleaned_data.parquet"
+
+def save_cleaned_data(df: pd.DataFrame) -> None:
+    """Save cleaned data to cleaned_data.parquet.
+
+    Args:
+        df (pd.DataFrame): Cleaned dataframe to save.
+    """
+    cleaned_data.parent.mkdir(exist_ok=True)
+    df.to_parquet(cleaned_data, index=False)
