@@ -479,7 +479,6 @@ def plot_cramerv_matrix(
         fmt=".2f",
         square=True,
         cbar=True,
-        cmap="viridis",
     )
 
     plt.xticks(rotation=45, ha="right")
@@ -488,4 +487,93 @@ def plot_cramerv_matrix(
     plt.gca().spines["right"].set_visible(False)
 
     plt.tight_layout()
-    return plt.gcf()
+    plt.show()
+
+
+def plot_pairplot(
+    df: pd.DataFrame,
+    cols: list[str],
+) -> None:
+    """
+    Plot a lower-triangle pairplot with histograms on the diagonal.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        cols (list[str]): Columns to include in the pairplot.
+    """
+    sns.pairplot(
+        df[cols].dropna(),
+        diag_kind="hist",
+        corner=True
+    )
+
+    plt.show()
+
+
+def plot_spatial_scatter(
+    df: pd.DataFrame,
+    longitude_col: str,
+    latitude_col: str,
+    value_col: str,
+    figsize: tuple = (8, 6),
+    title: Optional[str] = None,
+) -> None:
+    """
+    Plot a spatial scatter plot coloured by a numeric value.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        longitude_col (str): Longitude column name.
+        latitude_col (str): Latitude column name.
+        value_col (str): Numeric column used for colour (e.g. Price).
+        figsize (tuple, optional): Figure size.
+        title (str, optional): Plot title.
+    """
+    plt.figure(figsize=figsize)
+
+    scatter = plt.scatter(
+        df[longitude_col],
+        df[latitude_col],
+        c=df[value_col],
+        cmap="viridis",
+        alpha=0.7,
+    )
+
+    plt.colorbar(scatter, label=value_col)
+    plt.xlabel(longitude_col)
+    plt.ylabel(latitude_col)
+    plt.title(title if title is not None else f"Spatial Distribution of {value_col}")
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+def plot_scatter(
+    df: pd.DataFrame,
+    x_col: str,
+    y_col: str,
+    figsize: tuple = (8, 4),
+    title: Optional[str] = None,
+) -> None:
+    """
+    Plot a simple scatter plot of two variables.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        x_col (str): Column for the x-axis.
+        y_col (str): Column for the y-axis.
+        figsize (tuple, optional): Figure size.
+        title (str, optional): Plot title.
+    """
+    plt.figure(figsize=figsize)
+
+    plt.scatter(df[x_col], df[y_col], alpha=0.3)
+
+    plt.xlabel(x_col)
+    plt.ylabel(y_col)
+    plt.title(title if title is not None else f"{y_col} vs {x_col}")
+
+    plt.tight_layout()
+    plt.show()
