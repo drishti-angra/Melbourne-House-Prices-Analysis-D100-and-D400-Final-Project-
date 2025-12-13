@@ -1,4 +1,5 @@
-from typing import Optional, List 
+from typing import Optional, List, Iterable
+from scipy.stats import chi2_contingency
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -7,6 +8,7 @@ import numpy as np
 from fitter import Fitter 
 import scipy.stats as st
 import seaborn as sns
+
 
 
 
@@ -370,21 +372,120 @@ def plot_missing_proportion(
     plt.show()
 
 
-def plot_size_pairplot(
+def plot_violinplot(
     df: pd.DataFrame,
-    columns: list[str],
+    x_col: str,
+    y_col: str,
+    y_max: Optional[float] = None,
+    title: Optional[str] = None,
+    xlabel: Optional[str] = None,
+    ylabel: Optional[str] = None,
 ) -> None:
     """
-    Plot pairwise scatter plots (and histograms on the diagonal)
-    for selected size-related features.
+    Plot a violin plot of a numeric variable grouped by a categorical variable.
 
-    Args:
-        df (pd.DataFrame): Input dataframe.
-        columns (list[str]): Columns to include in the pairplot.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe.
+    x_col : str
+        Categorical column for the x-axis (e.g. Bedroom2).
+    y_col : str
+        Numeric column for the y-axis (e.g. BuildingArea).
+    y_max : float, optional
+        Upper bound to restrict the numeric variable (e.g. 1000).
+    title : str, optional
+        Plot title. Defaults to 'Distribution of <y_col> by <x_col>'.
+    xlabel : str, optional
+        X-axis label. Defaults to x_col.
+    ylabel : str, optional
+        Y-axis label. Defaults to y_col.
     """
-    sns.pairplot(
-        df[columns].dropna(),
-        diag_kind="hist"
+    df_plot = df.dropna(subset=[x_col, y_col])
+
+    if y_max is not None:
+        df_plot = df_plot[df_plot[y_col] <= y_max]
+
+    plt.figure(figsize=(10, 5))
+
+    sns.violinplot(
+        data=df_plot,
+        x=x_col,
+        y=y_col,
+        inner="quartile",
+        cut=0,
     )
 
+    plt.title(title if title is not None else f"Distribution of {y_col} by {x_col}")
+    plt.xlabel(xlabel if xlabel is not None else x_col)
+    plt.ylabel(ylabel if ylabel is not None else y_col)
+
+    plt.tight_layout()
     plt.show()
+
+
+
+
+
+def plot_cramerv_matrix(
+    df: pd.DataFrame,
+    cols: Optional[Iterable[str]] = None,
+    title: str = "Cramér's V Correlation Matrix",
+    figsize: tuple = (10, 8),
+) -> plt.Figure:
+    """
+    Plot a Cramér's V correlation matrix for categorical variables.
+
+    Args:
+        df (pd.DataFrame): Input pandas DataFrame.
+        cols (Iterable[str], optional): Categorical columns to include.
+            If None, all object/category columns are used.
+        title (str, optional): Title of the plot.
+        figsize (tuple, optional): Figure size.
+
+    Returns:
+        plt.Figure: Matplotlib figure object.
+    """
+    if cols is None:
+        cols = df.select_dtypes(include=["object", "category"]).columns
+
+    cols = list(cols)
+    n = len(cols)
+
+    cramer_matrix = pd.DataFrame(
+        np.zeros((n, n)),
+        index=cols,
+        columns=cols,
+    )
+
+    for i in range(n):
+        for j in range(n):
+            contingency = pd.crosstab(df[cols[i]], df[cols[j]])
+
+            if contingency.shape[0] <= 1 or contingency.shape[1] <= 1:
+                cramer_matrix.iloc[i, j] = np.nan
+            else:
+                chi2 = chi2_contingency(contingency)[0]
+                n_obs = contingency.values.sum()
+                r, k = contingency.shape
+                cramer_matrix.iloc[i, j] = np.sqrt(
+                    chi2 / (n_obs * (min(r, k) - 1))
+                )
+
+    plt.figure(figsize=figsize)
+    sns.heatmap(
+        cramer_matrix,
+        annot=True,
+        fmt=".2f",
+        square=True,
+        cbar=True,
+        cmap="viridis",
+    )
+
+    plt.xticks(rotation=45, ha="right")
+    plt.title(title)
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+
+    plt.tight_layout()
+    return plt.gcf()
