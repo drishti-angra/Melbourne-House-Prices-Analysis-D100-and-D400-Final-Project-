@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Iterable
 
 import pandas as pd
 
@@ -150,3 +151,18 @@ def impute_council_from_suburb(
     df_imputed[council_col] = df_imputed[council_col].fillna(unavailable_label)
 
     return df_imputed
+
+
+
+def drop_columns(df: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
+    """
+    Drop specified columns from a DataFrame.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        columns (Iterable[str]): Columns to drop.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns removed.
+    """
+    return df.drop(columns=list(columns))
