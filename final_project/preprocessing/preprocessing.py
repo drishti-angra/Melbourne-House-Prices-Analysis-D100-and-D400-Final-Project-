@@ -1,9 +1,11 @@
 from pathlib import Path
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
 import pandas as pd
 import hashlib
 import numpy as np 
+
 
 
 
@@ -51,6 +53,7 @@ def create_sample_split(df, id_column, training_frac=0.8):
 
     return df
 
+
 def save_train_test_parquet(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Split a DataFrame into train and test sets using the 'sample' column
@@ -78,3 +81,25 @@ def save_train_test_parquet(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     test_df.to_parquet(data_dir / "test.parquet", index=False)
 
     return train_df, test_df
+
+class ZeroMedian_Imputer(BaseEstimator, TransformerMixin):
+    """
+    Imputes median for values which are zero
+    """
+
+    def fit(self, X, y=None):
+
+        X = np.asarray(X, dtype=float)
+        X_new = np.where(X ==0, np.nan, X)
+        self.medians_ = np.nanmedian(X_new, axis=0)
+        return self
+    
+    def transform(self, X):
+
+        X = np.asarray(X, dtype=float).copy()
+
+        for i in range(X.shape[1]):
+            X[X[:, i] == 0, i] = self.medians_[i]
+
+        return X
+    

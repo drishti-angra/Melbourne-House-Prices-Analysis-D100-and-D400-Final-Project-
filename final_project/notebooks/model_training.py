@@ -13,7 +13,20 @@ df_compiled.head()
 
 #%%
 #Creating a Train Test Split 
-create_sample_split(df_compiled, id_column="ID", training_frac=0.8)
+create_sample_split(df_compiled, id_column="Address", training_frac=0.8)
 df_compiled.head()
+
+# %%
+# Save train and test sets to parquet files
+df_train, df_test = save_train_test_parquet(df_compiled)
+# %%
+df_train.head(30)
+
+
+# %%
+df_test.head(30)
+
+#%%
+
 
 # %%

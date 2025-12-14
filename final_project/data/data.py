@@ -78,7 +78,6 @@ def float_to_integer(df: pd.DataFrame, column: str) -> pd.DataFrame:
     df[column] = df[column].astype("Int64")
     return df
 
-import pandas as pd
 
 
 
@@ -102,7 +101,6 @@ def add_missing_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-import pandas as pd
 
 
 
@@ -179,3 +177,17 @@ def save_cleaned_data(df: pd.DataFrame) -> None:
     """
     cleaned_data.parent.mkdir(exist_ok=True)
     df.to_parquet(cleaned_data, index=False)
+
+
+
+def add_zero_dummy(df, column):
+    """
+    Creates a dummy column where:
+    - 1 if df[column] == 0
+    - 0 otherwise
+
+    The new column will be named column + '_zero'
+    """
+    dummy_name = column + "_zero"
+    df[dummy_name] = (df[column] == 0).astype(int)
+    return df
