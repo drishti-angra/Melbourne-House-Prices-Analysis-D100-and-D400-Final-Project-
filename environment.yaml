@@ -25,7 +25,9 @@ dependencies:
   - jupyter
   - jupyterlab
   - scipy
+  - pyarrow
 
   - pip:
       - xgboost
       - fitter
+      - category-encoders

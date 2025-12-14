@@ -1,5 +1,12 @@
 from pathlib import Path
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, SplineTransformer
+from sklearn.impute import SimpleImputer
+from category_encoders import TargetEncoder 
+
 
 
 import pandas as pd
@@ -82,24 +89,137 @@ def save_train_test_parquet(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
 
     return train_df, test_df
 
-class ZeroMedian_Imputer(BaseEstimator, TransformerMixin):
-    """
-    Imputes median for values which are zero
-    """
+
+class ZeroMedianImputer(BaseEstimator, TransformerMixin):
+    """Impute median for values equal to 0."""
 
     def fit(self, X, y=None):
-
         X = np.asarray(X, dtype=float)
-        X_new = np.where(X ==0, np.nan, X)
-        self.medians_ = np.nanmedian(X_new, axis=0)
+        X_no_zero = np.where(X == 0, np.nan, X)
+        self.medians_ = np.nanmedian(X_no_zero, axis=0)
         return self
-    
+
     def transform(self, X):
+        check_is_fitted(self, "medians_")
+        X = np.asarray(X, dtype=float)
+        return np.where(X == 0, self.medians_, X)
 
-        X = np.asarray(X, dtype=float).copy()
 
-        for i in range(X.shape[1]):
-            X[X[:, i] == 0, i] = self.medians_[i]
+
+class UpperWinsorizer(BaseEstimator, TransformerMixin):
+    """
+    Upper tail winsorization transformer.
+    """
+    def __init__(self, upper_quantile=0.95):
+        self.upper_quantile = upper_quantile
+
+    def fit(self, X, y=None):
+        self.upper_bound_ = np.percentile(X, self.upper_quantile * 100, axis=0)
+        return self
+
+    def transform(self, X):
+        check_is_fitted(self, "upper_bound_")
+        return np.minimum(X, self.upper_bound_)
+
+
+
+class ConditionalMedianImputer(BaseEstimator, TransformerMixin):
+    """
+    Imputes median values conditional on a feature.
+    """
+
+    def __init__(self, target_col: str, condition_col: str):
+        self.target_col = target_col
+        self.condition_col = condition_col
+
+    def fit(self, X, y=None):
+        self.condition_medians_ = (
+            X.groupby(self.condition_col)[self.target_col].median()
+        )
+        return self
+
+    def transform(self, X):
+        check_is_fitted(self, "condition_medians_")
+
+        X = X.copy()
+        missing = X[self.target_col].isna()
+
+        if missing.any():
+            X.loc[missing, self.target_col] = (
+                X.loc[missing, self.condition_col].map(self.condition_medians_)
+            )
 
         return X
-    
+
+
+def preprocessor() -> ColumnTransformer:
+
+    #pipleline for Bathroom, Bedroom2
+    rooms_pipeline = Pipeline(
+        steps = [
+            ("zero_median_imputer", ZeroMedianImputer()),
+        ]
+    )
+    #pipeline for Landsize
+    landsize_pipeline = Pipeline(
+        steps = [
+            ("upper_tail_winsorizer", UpperWinsorizer(upper_quantile=0.95)),
+            ("standard_scaler", StandardScaler()),
+        ]
+    )
+
+    #pipeline for Car
+    car_pipeline = Pipeline(
+        steps = [
+            ("median_imputer", SimpleImputer(strategy="median")),
+        ]
+    )
+
+    #pipeline for YearBuilt 
+    yearbuilt_pipeline = Pipeline(
+        steps = [
+            ("median_imputer", SimpleImputer(strategy="median")),
+            ("standard_scaler", StandardScaler()),
+        ]
+    )
+
+    #pipeline for Method, Regionname, Type
+    categorical_pipeline = Pipeline(
+        steps = [
+            ("onehot_encoder", OneHotEncoder(drop="first", handle_unknown="ignore", sparse_output=False)),
+        ]
+    )
+
+
+    #pipeline for Suburb
+    suburb_pipeline = Pipeline(
+        steps = [
+            ("target_encoder", TargetEncoder(smoothing=10)),
+        ]
+    )
+
+
+    #pipeline for Longitude, Latitude
+    location_pipeline = Pipeline(
+        steps = [
+            ("standard_scaler", StandardScaler()),
+            ("spline_transformer", SplineTransformer(knots="quantile", include_bias=False, n_knots=5)),
+            
+        ]
+    )
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("rooms", rooms_pipeline, ["Bathroom", "Bedroom2"]),
+            ("landsize", landsize_pipeline, ["Landsize"]),
+            ("car", car_pipeline, ["Car"]),
+            ("yearbuilt", yearbuilt_pipeline, ["YearBuilt"]),
+            ("categorical", categorical_pipeline, ["Method", "Regionname", "Type"]),
+            ("suburb", suburb_pipeline, ["Suburb"]),
+            ("location", location_pipeline, ["Longitude", "Latitude"]),
+        ],
+        remainder="passthrough"
+    )
+
+    return preprocessor
+

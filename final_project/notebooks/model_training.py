@@ -1,6 +1,5 @@
 #%%
 #import functions
-from venv import create
 from final_project.preprocessing.preprocessing import load_parquet_data, create_sample_split, save_train_test_parquet
 
 
@@ -20,13 +19,4 @@ df_compiled.head()
 # Save train and test sets to parquet files
 df_train, df_test = save_train_test_parquet(df_compiled)
 # %%
-df_train.head(30)
 
-
-# %%
-df_test.head(30)
-
-#%%
-
-
-# %%
