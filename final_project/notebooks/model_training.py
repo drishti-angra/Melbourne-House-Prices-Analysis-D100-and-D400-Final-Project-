@@ -2,8 +2,8 @@
 #import functions
 from re import split
 from final_project.preprocessing.preprocessing import load_parquet_data, create_sample_split, save_train_test_parquet, split_X_y, ZeroMedianImputer, UpperWinsorizer, ConditionalMedianImputer, preprocessor
-from final_project.modelling_GLM.modelling_GLM import pipeline_glm
-from final_project.modelling_LGBM.modelling_LGBM import pipeline_lgbm
+from final_project.modelling_GLM.modelling_GLM import pipeline_glm, tuning_glm
+from final_project.modelling_LGBM.modelling_LGBM import pipeline_lgbm, tuning_lgbm
 
 
 #%% 
@@ -28,3 +28,7 @@ X_train, y_train = split_X_y(df_train, target_col = "log_Price")
 # Splitting into X_test, y_test
 X_test, y_test = split_X_y(df_test, target_col = "log_Price")
 
+#%%
+
+
+# %%

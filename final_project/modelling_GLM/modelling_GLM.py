@@ -1,6 +1,5 @@
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import RandomizedSearchCV
-from final_project.notebooks.model_training import X_train
 from glum import GeneralizedLinearRegressor, TweedieDistribution
 from final_project.preprocessing.preprocessing import preprocessor, ConditionalMedianImputer
 
@@ -16,7 +15,7 @@ def pipeline_glm() -> Pipeline:
 
     glm_model = GeneralizedLinearRegressor(
         family = TweedieDistribution(power=0.0), 
-        fit_intercept=True
+        fit_intercept=True,
     )
 
     glm_pipeline = Pipeline(
@@ -33,7 +32,8 @@ def tuning_glm(
         X_training: pd.DataFrame, 
         y_training: pd.Series, 
         chosen_pipeline: Pipeline,
-        cv_folds: int = 5
+        cv_folds: int = 5,
+        random_state: int = 42,
         ) -> Pipeline:
     
     """
@@ -49,8 +49,9 @@ def tuning_glm(
         A scikit-learn Pipeline.
     cv_folds : int, default=5
         Number of cross-validation folds.
-    n_iter : int, default=20
-        Number of random hyperparameter combinations to evaluate.
+    random_state: int, default = 42
+        For reproducibility of results.
+
 
     Returns
     -------
@@ -72,15 +73,15 @@ def tuning_glm(
         cv = cv_folds, 
         scoring = "neg_mean_squared_error", 
         n_jobs = 1, 
-        random_state = 42, 
+        random_state = random_state, 
         verbose = 1,
     )
 
     cv.fit(X_training, y_training)
-    best_pipeline = cv.best_estimator_
+    best_pipeline_glm = cv.best_estimator_
 
     print("best score:", cv.best_score_)
-    print("best pipeline:", best_pipeline)
+    print("best pipeline:", best_pipeline_glm)
     print("best_parameters:", cv.best_params_)
 
-    return best_pipeline
+    return best_pipeline_glm
