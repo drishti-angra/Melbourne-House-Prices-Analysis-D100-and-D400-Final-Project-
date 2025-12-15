@@ -29,6 +29,9 @@ X_train, y_train = split_X_y(df_train, target_col = "log_Price")
 X_test, y_test = split_X_y(df_test, target_col = "log_Price")
 
 #%%
-
+#Tuning of GLM model (regularisation) to find the best model 
+glm_best_pipeline = tuning_glm (X_train, y_train, pipeline_glm())
 
 # %%
+#Hyperparameter tuning of LightGBM model to find the best model 
+lgbm_best_pipeline = tuning_lgbm (X_train, y_train, pipeline_lgbm())

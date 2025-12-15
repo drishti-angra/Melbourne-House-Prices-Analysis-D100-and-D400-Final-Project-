@@ -94,13 +94,19 @@ def tuning_lgbm(
     )
 
 
+    # Fit the preprocessing steps on the training split only
+    prep_pipe = chosen_pipeline[:-1]          # everything except lgbm_model
+    prep_pipe.fit(X_tr, y_tr)
+
+    X_val_t = prep_pipe.transform(X_val)      # transformed validation features
+
+
     cv.fit(
         X_tr,
         y_tr,
-        lgbm_model__eval_set=[(X_val, y_val)],
+        lgbm_model__eval_set=[(X_val_t, y_val)],
         lgbm_model__callbacks=[lgb.early_stopping(stopping_rounds=early_stopping_rounds)],
     )
-
 
 
     best_pipeline_lgbm = cv.best_estimator_

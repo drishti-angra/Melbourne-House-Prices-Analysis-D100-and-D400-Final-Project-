@@ -94,7 +94,8 @@ def save_train_test_parquet(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
 
 def split_X_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Series]:
     """
-    Split a DataFrame into X_train, y_train, X_test, y_test
+    Split a DataFrame into X_train, y_train, X_test, y_test.
+    Dropping Address as it is a string.
 
     Parameters
     ----------
@@ -107,7 +108,7 @@ def split_X_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Serie
     y : pd.Series
     """
 
-    X = df.drop(columns=[target_col])
+    X = df.drop(columns=[target_col, "Address"])
     y = df[target_col]
 
     return X, y
@@ -168,6 +169,9 @@ class ConditionalMedianImputer(BaseEstimator, TransformerMixin):
         check_is_fitted(self, "condition_medians_")
 
         X = X.copy()
+
+        X[self.target_col] = X[self.target_col].astype(float)
+
         missing = X[self.target_col].isna()
 
         if missing.any():
