@@ -6,6 +6,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, SplineTransformer
 from sklearn.impute import SimpleImputer
 from category_encoders import TargetEncoder 
+from typing import Tuple
 
 
 
@@ -88,6 +89,31 @@ def save_train_test_parquet(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     test_df.to_parquet(data_dir / "test.parquet", index=False)
 
     return train_df, test_df
+
+
+
+def split_X_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Series]:
+    """
+    Split a DataFrame into X_train, y_train, X_test, y_test
+
+    Parameters
+    ----------
+    df : pd.DataFrame (Input data)
+    target_col : str (Name of target column)
+
+    Returns
+    -------
+    X : pd.DataFrame
+    y : pd.Series
+    """
+
+    X = df.drop(columns=[target_col])
+    y = df[target_col]
+
+    return X, y
+
+
+
 
 
 class ZeroMedianImputer(BaseEstimator, TransformerMixin):
@@ -199,7 +225,7 @@ def preprocessor() -> ColumnTransformer:
     )
 
 
-    #pipeline for Longitude, Latitude
+    #pipeline for Longtitude, Lattitude
     location_pipeline = Pipeline(
         steps = [
             ("standard_scaler", StandardScaler()),
@@ -216,7 +242,7 @@ def preprocessor() -> ColumnTransformer:
             ("yearbuilt", yearbuilt_pipeline, ["YearBuilt"]),
             ("categorical", categorical_pipeline, ["Method", "Regionname", "Type"]),
             ("suburb", suburb_pipeline, ["Suburb"]),
-            ("location", location_pipeline, ["Longitude", "Latitude"]),
+            ("location", location_pipeline, ["Longtitude", "Lattitude"]),
         ],
         remainder="passthrough"
     )
