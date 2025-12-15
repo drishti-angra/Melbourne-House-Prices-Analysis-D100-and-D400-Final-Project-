@@ -26,6 +26,7 @@ dependencies:
   - jupyterlab
   - scipy
   - pyarrow
+  - joblib
 
   - pip:
       - xgboost

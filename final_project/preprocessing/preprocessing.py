@@ -15,9 +15,9 @@ import hashlib
 import numpy as np 
 
 
-
-
 cleaned_data = Path(__file__).resolve().parents[2] / "data" / "cleaned_data.parquet"
+
+
 
 def load_parquet_data() -> pd.DataFrame:
     """
@@ -89,6 +89,7 @@ def save_train_test_parquet(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     test_df.to_parquet(data_dir / "test.parquet", index=False)
 
     return train_df, test_df
+  
 
 
 
@@ -112,9 +113,6 @@ def split_X_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Serie
     y = df[target_col]
 
     return X, y
-
-
-
 
 
 class ZeroMedianImputer(BaseEstimator, TransformerMixin):
