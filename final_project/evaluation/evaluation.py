@@ -1,4 +1,5 @@
 from sklearn.metrics import r2_score
+from pandas.api.types import is_numeric_dtype
 
 
 import numpy as np 
@@ -15,7 +16,7 @@ def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
 
     Reports metrics on:
     1) Log-price scale
-    2) Original price scale (via exp transformation)
+    2) Original price scale
 
     Parameters
     ----------
@@ -27,14 +28,12 @@ def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        Evaluation metrics (metrics as rows).
+        metrics
     """
     y_true_log = np.asarray(y_true_log, dtype=float)
     y_pred_log = np.asarray(y_pred_log, dtype=float)
 
-    # =====================
-    # Log-price metrics
-    # =====================
+    # log price metrics
     log_true_mean = np.mean(y_true_log)
     log_pred_mean = np.mean(y_pred_log)
 
@@ -43,9 +42,7 @@ def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
     log_bias = (log_pred_mean - log_true_mean) / log_true_mean
     log_mae_pct = log_mae / log_true_mean
 
-    # =====================
-    # Price-scale metrics
-    # =====================
+    # price metrics
     price_true = np.exp(y_true_log)
     price_pred = np.exp(y_pred_log)
 
@@ -58,7 +55,7 @@ def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
     price_mae_pct = price_mae / price_true_mean
 
     metrics = {
-        # log-price
+
         "Log: True Mean": log_true_mean,
         "Log: Mean Prediction": log_pred_mean,
         "Log: MAE": log_mae,
@@ -66,7 +63,6 @@ def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
         "Log: Bias": log_bias,
         "Log: MAE / Mean": log_mae_pct,
 
-        # price
         "Price: True Mean": price_true_mean,
         "Price: Mean Prediction": price_pred_mean,
         "Price: MAE": price_mae,
@@ -94,29 +90,35 @@ def plot_predicted_actual(ax, y_true, y_pred, title, xlabel, ylabel):
     ax.set_ylabel(ylabel)
 
 
+
+
 def dalex_explainer(model, X, y, label):
-    """
-    Creating Dalex explainer to find the most important features
+    X_dalex = X.copy()
+
+    # 1) due to "boolean value of NA Ambiguous error"
+    X_dalex = X_dalex.apply(lambda s: s.astype(object).where(~pd.isna(s), np.nan))
+    y_dalex = np.asarray(y, dtype=float)
+
+    # 2) Convert numeric columns back to numeric for PDP
+    numeric_cols = [
+        "Distance", "Bedroom2", "Bathroom", "Car", "Landsize", "YearBuilt",
+        "Lattitude", "Longtitude",
+        "Year_binary",
+        "Missing_Car", "Missing_BuildingArea", "Missing_YearBuilt",
+        "Landsize_zero", "Bathroom_zero", "Bedroom2_zero",
+    ]
+    for col in numeric_cols:
+        if col in X_dalex.columns:
+            X_dalex[col] = pd.to_numeric(X_dalex[col], errors="coerce")
+
     
-    Parameters
-    ----------
-    model
-        Fitted sklearn-compatible model or pipeline.
-    X : pd.DataFrame
-        Feature matrix used for explanation.
-    y : array-like
-        True target values.
-    label : str
-        Label used in DALEX plots (e.g. "GLM", "LGBM").
 
-    Returns
-    -------
-    dx.Explainer
-        DALEX explainer object.
-    """
+    explainer = dx.Explainer(model= model, data=X_dalex, y=y_dalex, label= label)
 
-    explainer = dx.Explainer(model=model, data=X, y=y, label=label)
     return explainer
+
+
+
 
 def feature_importance(explainer):
     """
@@ -136,3 +138,105 @@ def feature_importance(explainer):
     dalex_feature_importance = explainer.model_parts()
 
     return dalex_feature_importance
+
+
+
+def plot_pdp(glm_explainer, lgbm_explainer, feature: str, variable_type: str):
+    """
+    Plotting PDP for a chosen feature
+
+    Parameters
+    ----------
+    glm_explainer : dx.Explainer
+        DALEX explainer for the GLM model.
+    lgbm_explainer : dx.Explainer
+        DALEX explainer for the LGBM model.
+    feature : str
+        Feature name to plot.
+    variable_type : {"numerical", "categorical"}
+        Explicit feature type for DALEX.
+    """
+
+    glm_pdp = glm_explainer.model_profile(variables=[feature], type="partial", variable_type =variable_type)
+    lgbm_pdp = lgbm_explainer.model_profile(variables=[feature], type="partial", variable_type =variable_type)
+
+    glm_pdp.plot(lgbm_pdp)
+
+
+
+
+def lorenz_curve(y_true, y_pred):
+    """
+    Lorenz curve for regression without exposure weights.
+
+    Parameters
+    ----------
+    y_true : array-like
+        True values
+    y_pred : array-like
+        Predicted values
+
+    Returns
+    -------
+    cumulated_samples : np.ndarray
+        Cumulative share of samples (0..1)
+    cumulated_true : np.ndarray
+        Cumulative share of total y_true captured when sorting by y_pred
+    """
+    y_true = np.asarray(y_true, dtype=float)
+    y_pred = np.asarray(y_pred, dtype=float)
+
+    ranking = np.argsort(y_pred)
+    y_true_sorted = y_true[ranking]
+
+    cum_true = np.cumsum(y_true_sorted)
+    cum_true /= cum_true[-1] 
+
+    cum_samples = np.linspace(0, 1, len(y_true_sorted))
+    return cum_samples, cum_true
+
+
+
+
+def plot_lorenz(y_true, glm_pred_log, lgbm_pred_log, xtitle):
+    """
+    Plot Lorenz curves for GLM and LGBM 
+
+    Parameters
+    ----------
+    y_true_log : array-like
+        True log(price).
+    glm_pred_log : array-like
+        Predicted log(price) from GLM.
+    lgbm_pred_log : array-like
+        Predicted log(price) from LGBM.
+    xtitle: str
+        title of the graph 
+
+    """
+    y_true = np.asarray(y_true, dtype=float)
+    glm_pred_log = np.asarray(glm_pred_log, dtype=float)
+    lgbm_pred_log = np.asarray(lgbm_pred_log, dtype=float)
+
+    y_true = y_true
+    glm_pred = glm_pred_log
+    lgbm_pred = lgbm_pred_log
+    title = xtitle
+
+    # Compute curves
+    x_glm, y_glm = lorenz_curve(y_true, glm_pred)
+    x_lgbm, y_lgbm = lorenz_curve(y_true, lgbm_pred)
+
+    # Plot
+    plt.figure(figsize=(7, 5))
+    plt.plot(x_glm, y_glm, label="GLM")
+    plt.plot(x_lgbm, y_lgbm, label="LGBM")
+
+    # Equality line
+    plt.plot([0, 1], [0, 1], linestyle="--", label="Equality")
+
+    plt.title(title)
+    plt.xlabel("Cumulative share of properties- sorted by predicted price")
+    plt.ylabel("Cumulative share of total true price")
+    plt.legend()
+    plt.show()
