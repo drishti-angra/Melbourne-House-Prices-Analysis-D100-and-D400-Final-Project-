@@ -3,10 +3,10 @@ from sklearn.metrics import r2_score
 
 import numpy as np 
 import pandas as pd
+import matplotlib.pyplot as plt
+import dalex as dx
 
 
-import numpy as np
-import pandas as pd
 
 
 def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
@@ -78,3 +78,61 @@ def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
     return pd.DataFrame(metrics, index=[0]).T
 
 
+
+def plot_predicted_actual(ax, y_true, y_pred, title, xlabel, ylabel):
+    """
+    Scatter plot of predicted vs actual values with a y=x reference line.
+    """
+    ax.scatter(y_pred, y_true, alpha=0.25, s=12)
+
+    lo = min(np.min(y_true), np.min(y_pred))
+    hi = max(np.max(y_true), np.max(y_pred))
+    ax.plot([lo, hi], [lo, hi], linestyle="--")
+
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+
+def dalex_explainer(model, X, y, label):
+    """
+    Creating Dalex explainer to find the most important features
+    
+    Parameters
+    ----------
+    model
+        Fitted sklearn-compatible model or pipeline.
+    X : pd.DataFrame
+        Feature matrix used for explanation.
+    y : array-like
+        True target values.
+    label : str
+        Label used in DALEX plots (e.g. "GLM", "LGBM").
+
+    Returns
+    -------
+    dx.Explainer
+        DALEX explainer object.
+    """
+
+    explainer = dx.Explainer(model=model, data=X, y=y, label=label)
+    return explainer
+
+def feature_importance(explainer):
+    """
+    Using Dalex explainer to find the feature importance (using permutation importance)
+
+    Parameters
+    ----------
+    explainer : dx.Explainer
+        DALEX explainer object.
+
+    Returns
+    -------
+    dalex.model_explanations.ModelParts
+        Feature importance object.  
+
+    """
+    dalex_feature_importance = explainer.model_parts()
+
+    return dalex_feature_importance
