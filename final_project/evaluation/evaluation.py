@@ -5,65 +5,17 @@ import numpy as np
 import pandas as pd
 
 
-def evaluate_predictions(y_true, y_pred) -> pd.DataFrame:
-    """
-    Evaluate predictions for the GLM and LGBM models.
-
-    Metrics outputted are Mean true log(prices), mean predictions, RMSE, MAE, R^2, bias, and MAE as a percentage of mean log(prices)
-    of the mean house price.
-
-    Parameters
-    ----------
-    y_true
-        True target values (log house prices).
-    y_pred
-        Predicted target values.
-
-    Returns
-    -------
-    pd.DataFrame
-        Evaluation metrics (metrics as rows).
-    """
-    y_true = np.asarray(y_true, dtype=float)
-    y_pred = np.asarray(y_pred, dtype=float)
-
-    mean_true = float(np.mean(y_true))
-    mean_pred = float(np.mean(y_pred))
-
-    mae = float(np.mean(np.abs(y_pred - y_true)))
-    mse = float(np.mean((y_pred - y_true) ** 2))
-    rmse = float(np.sqrt(mse))
-    r2 = float(r2_score(y_true, y_pred))
-
-    evals = {
-        "Mean True log(Price)": mean_true,
-        "Mean Prediction of log(Prices)": mean_pred,
-        "Bias": (mean_pred - mean_true) / mean_true,
-        "MAE": mae,
-        "RMSE": rmse,
-        "R^2": r2,
-        "MAE as \%\ of mean log(prices) ": mae / mean_true,
-    }
-
-    return pd.DataFrame(evals, index=[0]).T
-
-
-
 import numpy as np
 import pandas as pd
-from sklearn.metrics import r2_score
 
 
-def evaluate_predictions_full(
-    y_true_log,
-    y_pred_log,
-) -> pd.DataFrame:
+def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
     """
-    Evaluate predictions for log-price house price models.
+    Evaluate predictions for a log-price house price model.
 
     Reports metrics on:
-    - log-price scale
-    - original price scale (via exp transformation)
+    1) Log-price scale
+    2) Original price scale (via exp transformation)
 
     Parameters
     ----------
@@ -80,48 +32,49 @@ def evaluate_predictions_full(
     y_true_log = np.asarray(y_true_log, dtype=float)
     y_pred_log = np.asarray(y_pred_log, dtype=float)
 
-    # -----------------
-    # Log-scale metrics
-    # -----------------
-    mean_true_log = np.mean(y_true_log)
-    mean_pred_log = np.mean(y_pred_log)
+    # =====================
+    # Log-price metrics
+    # =====================
+    log_true_mean = np.mean(y_true_log)
+    log_pred_mean = np.mean(y_pred_log)
 
-    mae_log = np.mean(np.abs(y_pred_log - y_true_log))
-    rmse_log = np.sqrt(np.mean((y_pred_log - y_true_log) ** 2))
-    r2_log = r2_score(y_true_log, y_pred_log)
+    log_mae = np.mean(np.abs(y_pred_log - y_true_log))
+    log_rmse = np.sqrt(np.mean((y_pred_log - y_true_log) ** 2))
+    log_bias = (log_pred_mean - log_true_mean) / log_true_mean
+    log_mae_pct = log_mae / log_true_mean
 
-    # -------------------
+    # =====================
     # Price-scale metrics
-    # -------------------
+    # =====================
     price_true = np.exp(y_true_log)
     price_pred = np.exp(y_pred_log)
 
-    mean_true_price = np.mean(price_true)
-    mean_pred_price = np.mean(price_pred)
+    price_true_mean = np.mean(price_true)
+    price_pred_mean = np.mean(price_pred)
 
-    mae_price = np.mean(np.abs(price_pred - price_true))
-    rmse_price = np.sqrt(np.mean((price_pred - price_true) ** 2))
+    price_mae = np.mean(np.abs(price_pred - price_true))
+    price_rmse = np.sqrt(np.mean((price_pred - price_true) ** 2))
+    price_bias = (price_pred_mean - price_true_mean) / price_true_mean
+    price_mae_pct = price_mae / price_true_mean
 
-    mae_price_pct = mae_price / mean_true_price
+    metrics = {
+        # log-price
+        "Log: True Mean": log_true_mean,
+        "Log: Mean Prediction": log_pred_mean,
+        "Log: MAE": log_mae,
+        "Log: RMSE": log_rmse,
+        "Log: Bias": log_bias,
+        "Log: MAE / Mean": log_mae_pct,
 
-    # multiplicative percentage error (very interpretable)
-    mean_abs_pct_error = np.mean(np.abs(price_pred / price_true - 1))
-
-    evals = {
-        # log scale
-        "Mean True (log)": mean_true_log,
-        "Mean Pred (log)": mean_pred_log,
-        "MAE (log)": mae_log,
-        "RMSE (log)": rmse_log,
-        "R^2 (log)": r2_log,
-
-        # price scale
-        "Mean True Price": mean_true_price,
-        "Mean Pred Price": mean_pred_price,
-        "MAE Price": mae_price,
-        "RMSE Price": rmse_price,
-        "MAE / Mean Price": mae_price_pct,
-        "Mean Abs % Error": mean_abs_pct_error,
+        # price
+        "Price: True Mean": price_true_mean,
+        "Price: Mean Prediction": price_pred_mean,
+        "Price: MAE": price_mae,
+        "Price: RMSE": price_rmse,
+        "Price: Bias": price_bias,
+        "Price: MAE / Mean": price_mae_pct,
     }
 
-    return pd.DataFrame(evals, index=[0]).T
+    return pd.DataFrame(metrics, index=[0]).T
+
+
