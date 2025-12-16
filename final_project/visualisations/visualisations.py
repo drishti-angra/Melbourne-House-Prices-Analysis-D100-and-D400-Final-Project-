@@ -377,6 +377,7 @@ def plot_violinplot(
     x_col: str,
     y_col: str,
     y_max: Optional[float] = None,
+    y_min: Optional[float] = None,
     title: Optional[str] = None,
     xlabel: Optional[str] = None,
     ylabel: Optional[str] = None,
@@ -405,6 +406,9 @@ def plot_violinplot(
 
     if y_max is not None:
         df_plot = df_plot[df_plot[y_col] <= y_max]
+    
+    if y_min is not None:
+        df_plot = df_plot[df_plot[y_col] >= y_min]
 
     plt.figure(figsize=(10, 5))
 
