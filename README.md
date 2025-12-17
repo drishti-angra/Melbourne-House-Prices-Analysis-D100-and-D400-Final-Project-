@@ -43,7 +43,7 @@ jupyter nbconvert --to notebook --execute notebooks_and_scripts/eda_cleaning.ipy
 ### model_training.py
 This script loads the parquet file containing cleaned data (before feature engineering). It creates a Train-Test split, saving the training and testing datasets as parquet files. X_train, y_train, X_test and y_test are also saved as parquet files. These are all saved in `d100_d400_code_1955C/data`.
 
-Then, the GLM and LGBM pipelines are tuned to find the best pipeline. The best pipelines are saved under `d100_d400_code_1955C/pipelines. 
+Then, the GLM and LGBM pipelines are tuned to find the best pipeline. The best pipelines are saved under `d100_d400_code_1955C/pipelines`. 
 
 To run this script from the terminal: 
 ```
