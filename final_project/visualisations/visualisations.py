@@ -12,6 +12,28 @@ import seaborn as sns
 
 
 
+def set_plot_style() -> None:
+    """Set consistent matplotlib style for report-quality figures."""
+    plt.rcParams.update({
+        "figure.figsize": (6, 5),
+        "figure.dpi": 120,
+        "savefig.dpi": 300,
+        "font.size": 11,
+        "axes.titlesize": 13,
+        "axes.labelsize": 11,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+        "axes.grid": True,
+        "grid.alpha": 0.3,
+        "grid.linestyle": "--",
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+    })
+
+
+
+
+
 def plot_histogram(
     df: pd.DataFrame,
     column: str,
@@ -72,8 +94,9 @@ def plot_distribution(
     f = Fitter(df[column].to_numpy(), distributions=dist)
     plt.figure(figsize=(10, 8))
     f.fit()
-    plt.title(f"Distribution of {column}, best fit: {f.get_best()}")
     f.summary()
+    best_fit = next(iter(f.get_best()))
+    plt.title(f"Distribution of {column} fitted against different distributions. Best fit: {best_fit}")
     plt.show()
 
 
@@ -89,19 +112,25 @@ def plot_boxplot(
     Args:
         df (pd.DataFrame): Input DataFrame.
         column (str): Column to plot.
-        ylabel (str, optional): Custom y-axis label. Defaults to the column name.
+        ylabel (str, optional): Custom y-axis label. Defaults to column name.
     """
-    plt.figure(figsize=(6, 5))
+    fig, ax = plt.subplots()
 
-    plt.boxplot(df[column].dropna(), vert=True)
+    ax.boxplot(
+        df[column].dropna(),
+        vert=True,
+        patch_artist=True,
+    )
 
-    label_to_use = ylabel if ylabel is not None else column
-    plt.ylabel(label_to_use)
+    ax.set_ylabel(ylabel if ylabel is not None else column)
+    ax.set_title(f"Box plot of {column}")
 
-    plt.xlabel("")
+   
+    ax.set_xticks([])
 
-    plt.title(f"Box Plot of {column}")
     plt.show()
+
+
 
 
 def plot_grouped_boxplot(
@@ -142,8 +171,6 @@ def plot_grouped_boxplot(
     plt.show()
 
 
-import pandas as pd
-import matplotlib.pyplot as plt
 
 def plot_value_counts(
     df: pd.DataFrame,
@@ -174,10 +201,6 @@ def plot_value_counts(
     plt.show()
 
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Optional
 
 
 def plot_kde_by_group(
@@ -229,7 +252,7 @@ def plot_barchart(
     column: str,
     title: Optional[str] = None,
     xlabel: Optional[str] = None,
-    ylabel: Optional[str] = "Count",
+    ylabel: Optional[str] = "Frequency",
 ) -> None:
     """
     Plot a bar chart of value counts for a column.
@@ -261,10 +284,7 @@ def plot_barchart(
     plt.tight_layout()
     plt.show()
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Optional
+
 
 
 def plot_kde(
@@ -382,26 +402,6 @@ def plot_violinplot(
     xlabel: Optional[str] = None,
     ylabel: Optional[str] = None,
 ) -> None:
-    """
-    Plot a violin plot of a numeric variable grouped by a categorical variable.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input dataframe.
-    x_col : str
-        Categorical column for the x-axis (e.g. Bedroom2).
-    y_col : str
-        Numeric column for the y-axis (e.g. BuildingArea).
-    y_max : float, optional
-        Upper bound to restrict the numeric variable (e.g. 1000).
-    title : str, optional
-        Plot title. Defaults to 'Distribution of <y_col> by <x_col>'.
-    xlabel : str, optional
-        X-axis label. Defaults to x_col.
-    ylabel : str, optional
-        Y-axis label. Defaults to y_col.
-    """
     df_plot = df.dropna(subset=[x_col, y_col])
 
     if y_max is not None:
@@ -418,8 +418,10 @@ def plot_violinplot(
         y=y_col,
         inner="quartile",
         cut=0,
+        palette="Set2",
     )
 
+    plt.xticks(rotation=30, ha="right")
     plt.title(title if title is not None else f"Distribution of {y_col} by {x_col}")
     plt.xlabel(xlabel if xlabel is not None else x_col)
     plt.ylabel(ylabel if ylabel is not None else y_col)
@@ -544,8 +546,8 @@ def plot_spatial_scatter(
     )
 
     plt.colorbar(scatter, label=value_col)
-    plt.xlabel(longitude_col)
-    plt.ylabel(latitude_col)
+    plt.xlabel("Longitude")
+    plt.ylabel("Latitude")
     plt.title(title if title is not None else f"Spatial Distribution of {value_col}")
 
     plt.tight_layout()
@@ -558,6 +560,8 @@ def plot_scatter(
     df: pd.DataFrame,
     x_col: str,
     y_col: str,
+    xlabel: str,
+    ylabel: str,
     figsize: tuple = (8, 4),
     title: Optional[str] = None,
 ) -> None:
@@ -568,6 +572,8 @@ def plot_scatter(
         df (pd.DataFrame): Input dataframe.
         x_col (str): Column for the x-axis.
         y_col (str): Column for the y-axis.
+        xlabel (str): Label for the x-axis (required).
+        ylabel (str): Label for the y-axis (required).
         figsize (tuple, optional): Figure size.
         title (str, optional): Plot title.
     """
@@ -575,9 +581,10 @@ def plot_scatter(
 
     plt.scatter(df[x_col], df[y_col], alpha=0.3)
 
-    plt.xlabel(x_col)
-    plt.ylabel(y_col)
-    plt.title(title if title is not None else f"{y_col} vs {x_col}")
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title if title is not None else f"{ylabel} vs {xlabel}")
 
     plt.tight_layout()
     plt.show()
+
