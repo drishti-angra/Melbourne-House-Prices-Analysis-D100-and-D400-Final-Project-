@@ -29,7 +29,7 @@ pre-commit install
 
 
 ## Running the package instructions
-The package can be run from the terminal or directly from executing the notebooks and python scripts. 
+The package can be run from the terminal or directly from executing notebooks and python scripts.
 
 ### eda_cleaning.ipynb 
 This notebook loads the raw data, conducts exploratory data analysis and contains explanatory data analysis plots which can be found in the report. 
