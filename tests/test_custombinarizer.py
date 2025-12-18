@@ -8,6 +8,7 @@ from final_project.preprocessing.feature_engineering import CustomBinarizer
 
 """
 To implement the pytest, type pytest tests/test_custombinarizer.py in the terminal. 
+
 Ensure you are in the parent directory and in the d100_housing virtual env.
 """
 

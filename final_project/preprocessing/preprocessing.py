@@ -21,10 +21,10 @@ cleaned_data = Path(__file__).resolve().parents[2] / "data" / "cleaned_data.parq
 
 def load_parquet_data() -> pd.DataFrame:
     """
-    Load cleaned data from a parquet file.
+    Load cleaned data from parquet file.
     
     Returns:
-    pd.DataFrame: Cleaned data as a pandas DataFrame
+    pd.DataFrame: Cleaned data
     """
 
     df = pd.read_parquet(cleaned_data)
@@ -40,14 +40,14 @@ def create_sample_split(df, id_column, training_frac=0.8):
     df : pd.DataFrame
         Training data
     id_column : str
-        Name of ID column
+        ID column name
     training_frac : float, optional
-        Fraction to use for training, by default 0.8
+        trainigg fraction 
 
     Returns
     -------
     pd.DataFrame
-        Training data with sample column containing train/test split based on IDs.
+        Training data with column containing train/test split.
     """
 
     if df[id_column].dtype == np.int64:
@@ -64,12 +64,9 @@ def create_sample_split(df, id_column, training_frac=0.8):
 
 def save_train_test_parquet(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Split a DataFrame into train and test sets using the 'sample' column
-    and save them to the project's data directory as parquet files.
+    Split dataFrame into train and test sets using the 'sample' column
+    and save them as parquet files.
 
-    The files are saved to:
-    house_prices_final_project/data/train.parquet
-    house_prices_final_project/data/test.parquet
 
     Returns
     -------
@@ -99,12 +96,12 @@ def split_X_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Serie
     Dropping Address as it is a string.
 
     Parameters
-    ----------
+    ---------
     df : pd.DataFrame (Input data)
     target_col : str (Name of target column)
 
     Returns
-    -------
+    ------
     X : pd.DataFrame
     y : pd.Series
     """
@@ -181,6 +178,10 @@ class ConditionalMedianImputer(BaseEstimator, TransformerMixin):
 
 
 def preprocessor() -> ColumnTransformer:
+    """
+    Returns: preprocessor
+    
+    """
 
     #pipleline for Bathroom, Bedroom2
     rooms_pipeline = Pipeline(

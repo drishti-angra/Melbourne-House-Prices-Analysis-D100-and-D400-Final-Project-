@@ -9,7 +9,7 @@ import pandas as pd
 
 def pipeline_lgbm() -> Pipeline:
     """
-    Defines the pipeline for LightGBM model.
+    LGBM pipeline.
 
     """
 
@@ -39,7 +39,7 @@ def tuning_lgbm(
         ) -> Pipeline:
     
     """
-    Hyperparameter tuning for the LightGBM model.
+    Hyperparameter tuning for the LGBM.
 
     Parameters
     ----------
@@ -48,20 +48,20 @@ def tuning_lgbm(
     y_training : pd.Series
         Training target.
     chosen_pipeline : Pipeline
-        A scikit-learn Pipeline.
+        Pipeline.
     cv_folds : int, default=5
-        Number of cross-validation folds.
+        N0. of cross-validation folds
     validation_size: float, default = 0.2
-        Proportion of training data used for the early stopping validations set.
+        Proportion of training data used for early stopping validations set.
     early_stopping_rounds: int, default = 25
-        number of rounds without improvement before applying early stopping.
+        early stopping rounds.
     random_state: int, default = 42
-        For reproducibility of results.
+        
 
     Returns
     -------
     Pipeline
-        Best LGBM pipeline after tuning
+        Best LGBM pipeline
     
 
     """

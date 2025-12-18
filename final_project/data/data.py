@@ -7,10 +7,10 @@ raw_data = Path(__file__).resolve().parents[2] / "data" / "raw_data.csv"
 
 
 def load_data() -> pd.DataFrame:
-    """Load raw data from raw_data.csv.
+    """Load raw data.
 
     Returns:
-        pd.DataFrame: Raw data as a pandas DataFrame
+        pd.DataFrame: Raw data as pandas DataFrame
 
     """
     df = pd.read_csv(raw_data)
@@ -19,7 +19,7 @@ def load_data() -> pd.DataFrame:
 
 
 def summarise_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Return a summary table describing each column of the DataFrame."""
+    """Return a summary table describing columns to see dtype, missing data and summary statistics."""
 
     summary = pd.DataFrame(
         {
@@ -40,32 +40,24 @@ def summarise_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def date_cleaning(df: pd.DataFrame, date_col="Date") -> pd.DataFrame:
     """
-    Convert a string-based date column into a datetime column and extract
-    the Year, Month, and Day components into new columns.
+    Convert a date column into a datetime column and extract the Year, Month, and Day components.
 
     Parameters
     ----------
     df : pd.DataFrame
     date_col : str, optional
-        The name of the column containing date strings in the format '%d/%m/%Y'.
-        Default is "Date".
 
     Returns
     -------
     pd.DataFrame
-        The dataframe with an updated datetime column and newly added
+        new dataframe with newly added
         'Year', 'Month', and 'Day' integer columns.
 
-    Notes
-    -----
-    - This function mutates the input dataframe.
-    - Assumes date format is day/month/year (e.g., '3/12/2016').
-    - Will raise a ValueError if the date format is incorrect.
     """
-    # Convert to datetime
+
     df[date_col] = pd.to_datetime(df[date_col], format="%d/%m/%Y", errors="raise")
 
-    # Extract components
+
     df["Year"] = df[date_col].dt.year
     df["Month"] = df[date_col].dt.month
     df["Day"] = df[date_col].dt.day
@@ -74,7 +66,7 @@ def date_cleaning(df: pd.DataFrame, date_col="Date") -> pd.DataFrame:
 
 
 def float_to_integer(df: pd.DataFrame, column: str) -> pd.DataFrame:
-    """Convert a float column to an integer column."""
+    """Convert a float column to integer column."""
     df[column] = df[column].astype("Int64")
     return df
 
@@ -84,19 +76,19 @@ def float_to_integer(df: pd.DataFrame, column: str) -> pd.DataFrame:
 def add_missing_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """
     For every column in the dataframe that contains missing values,
-    create a new indicator feature called 'Missing_<column>'.
-
-    The indicator is:
-        1 if the value is missing
+    create a indicator feature: 
+        1 if missing
         0 otherwise
 
-    The function returns a new dataframe with added columns.
+    Returns
+    -----
+    dataframe with the binary indicators.
     """
 
-    df = df.copy()  # do not overwrite original unless intended
+    df = df.copy() 
 
     for col in df.columns:
-        if df[col].isna().any():   # only for columns with missing values
+        if df[col].isna().any():  
             df[f"Missing_{col}"] = df[col].isna().astype(int)
 
     return df
@@ -113,18 +105,17 @@ def impute_council_from_suburb(
 ) -> pd.DataFrame:
     """
     Impute missing council values using suburb-to-council relationships
-    learned from existing data. Remaining missing councils are set to 'Unavailable'.
+    learned from existing data. Remaining missing councils are 'Unavailable'.
 
     Parameters
     ----------
     df : pd.DataFrame
-        Input dataframe.
     suburb_col : str, optional
-        Name of the suburb column. Default is 'Suburb'.
+        Name of suburb column
     council_col : str, optional
-        Name of the council column. Default is 'CouncilArea'.
+        Name of council colum
     unknown_label : str, optional
-        Label used when council cannot be inferred. Default is 'Unavailable'.
+        Label used when council not possible to be imputed. Default is 'Unavailable'.
 
     Returns
     -------
@@ -133,20 +124,19 @@ def impute_council_from_suburb(
     """
     df_imputed = df.copy()
 
-    # Build Suburb -> Council mapping from non-missing values
     suburb_to_council = (
         df_imputed.loc[df_imputed[council_col].notna(), [suburb_col, council_col]]
         .groupby(suburb_col)[council_col]
         .agg(lambda x: x.mode().iloc[0])
     )
 
-    # Impute missing councils using suburb mapping
+
     missing_mask = df_imputed[council_col].isna()
     df_imputed.loc[missing_mask, council_col] = (
         df_imputed.loc[missing_mask, suburb_col].map(suburb_to_council)
     )
 
-    # Any councils still missing -> Unavailable
+
     df_imputed[council_col] = df_imputed[council_col].fillna(unavailable_label)
 
     return df_imputed
@@ -155,14 +145,14 @@ def impute_council_from_suburb(
 
 def drop_columns(df: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
     """
-    Drop specified columns from a DataFrame.
+    Drop specified columns.
 
     Args:
         df (pd.DataFrame): Input dataframe.
         columns (Iterable[str]): Columns to drop.
 
     Returns:
-        pd.DataFrame: DataFrame with columns removed.
+        pd.DataFrame: DataFrame with columns dropped.
     """
     return df.drop(columns=list(columns))
 
@@ -170,10 +160,10 @@ def drop_columns(df: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
 cleaned_data = Path(__file__).resolve().parents[2] / "data" / "cleaned_data.parquet"
 
 def save_cleaned_data(df: pd.DataFrame) -> None:
-    """Save cleaned data to cleaned_data.parquet.
+    """Saving cleaned data to cleaned_data.parquet.
 
     Args:
-        df (pd.DataFrame): Cleaned dataframe to save.
+        df (pd.DataFrame): Cleaned dataframe.
     """
     cleaned_data.parent.mkdir(exist_ok=True)
     df.to_parquet(cleaned_data, index=False)
@@ -183,10 +173,10 @@ def save_cleaned_data(df: pd.DataFrame) -> None:
 def add_zero_dummy(df, column):
     """
     Creates a dummy column where:
-    - 1 if df[column] == 0
+    - 1 if df[column] = 0
     - 0 otherwise
 
-    The new column will be named column + '_zero'
+    new column named column + '_zero'
     """
     dummy_name = column + "_zero"
     df[dummy_name] = (df[column] == 0).astype(int)

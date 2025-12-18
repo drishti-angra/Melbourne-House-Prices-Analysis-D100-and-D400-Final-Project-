@@ -6,17 +6,15 @@ import pandas as pd
 
 def save_pipeline(pipeline, name: str) -> None:
     """
-    Save a fitted sklearn pipeline to the project's pipelines directory.
+    Save pipeline to the project directory.
 
-    The file is saved to:
-    house_prices_final_project/pipelines/{name}.joblib
 
     Parameters
     ----------
     pipeline
-        Fitted sklearn Pipeline to save.
+        pipline to save
     name : str
-        Filename (without extension).
+        Filename
 
     Returns
     -------
@@ -33,7 +31,7 @@ def save_pipeline(pipeline, name: str) -> None:
 
 def load_pipeline(name: str):
     """
-    Load a fitted sklearn pipeline from the project's pipelines directory.
+    Load a pipeline from directory.
     """
     project_root = Path(__file__).resolve().parents[2]
     pipelines_dir = project_root / "pipelines"
@@ -47,21 +45,17 @@ def load_pipeline(name: str):
 
 def save_X_y(X: pd.DataFrame, y: pd.Series, split_name: str) -> None:
     """
-    Save feature matrix X and target y to the project's data directory.
+    Save X and y to director.
 
-    Files are saved to:
-    house_prices_final_project/data/
-        X_{split_name}.parquet
-        y_{split_name}.parquet
 
     Parameters
     ----------
     X : pd.DataFrame
-        Feature matrix.
+        Features.
     y : pd.Series
-        Target vector.
+        Target.
     split_name : str
-        Name of the split (e.g. "train", "test").
+        Name of the split (e.g. "train", "test")
     """
     project_root = Path(__file__).resolve().parents[2]
     data_dir = project_root / "data"
@@ -79,7 +73,7 @@ def save_X_y(X: pd.DataFrame, y: pd.Series, split_name: str) -> None:
 
 def load_X_y(split_name: str) -> tuple[pd.DataFrame, pd.Series]:
     """
-    Load feature matrix X and target y from the project's data directory.
+    Load X and y from directory.
     """
     project_root = Path(__file__).resolve().parents[2]
     data_dir = project_root / "data"

@@ -13,7 +13,7 @@ import seaborn as sns
 
 
 def set_plot_style() -> None:
-    """Set consistent matplotlib style for report-quality figures."""
+    """consistent matplotlib style."""
     plt.rcParams.update({
         "figure.figsize": (6, 5),
         "figure.dpi": 120,
@@ -43,27 +43,26 @@ def plot_histogram(
     ylabel: Optional[str] = "Frequency",
 ) -> None:
     """
-    Plot a histogram with a KDE (density curve) overlay for a numerical column.
+    Plot a histogram with a KDE overlay.
 
     Parameters
     ----------
     df : pd.DataFrame
-        The dataframe containing the data.
+        dataframe containing the data.
     column : str
-        Name of the numerical column to plot.
+      numerical column to plot.
     bins : int, optional
-        Number of histogram bins. Default is 30.
+        No. of bins. Default is 30.
     title : str, optional
-        Title for the plot. Defaults to 'Histogram of <column>'.
+        Title. Defaults to 'Histogram of <column>'.
     xlabel : str, optional
-        Label for the x-axis. Defaults to the column name.
+        Label x-axis. Defaults to the column name.
     ylabel : str, optional
-        Label for the y-axis. Default is 'Frequency'.
+        Label y-axis. Default is 'Frequency'.
 
     Returns
     -------
-    None
-        Displays the histogram with KDE overlay.
+        histogram with KDE overlay.
     """
     title = title or f"Histogram of {column}"
     xlabel = xlabel or column
@@ -83,13 +82,13 @@ def plot_distribution(
     dist: Optional[List[str]] = None,
 ) -> None:
     """
-    Plots a fit of the target variable against a list of distributions.
+    Plots a fit of variable against a list of distributions.
 
-    Args:
-        df (pd.DataFrame): pandas DataFrame
+    Parameters:
+        df (pd.DataFrame): DataFrame
         column (str): column to analyse
         dist (list[str], optional): list of distributions to fit.
-            If None, all distributions available in `fitter` are used.
+            If None, all distributions available in `fitter` used.
     """
     f = Fitter(df[column].to_numpy(), distributions=dist)
     plt.figure(figsize=(10, 8))
@@ -109,10 +108,10 @@ def plot_boxplot(
     """
     Create a boxplot for a given column.
 
-    Args:
+    Parameters:
         df (pd.DataFrame): Input DataFrame.
         column (str): Column to plot.
-        ylabel (str, optional): Custom y-axis label. Defaults to column name.
+        ylabel (str, optional): y-axis label. Default: column name.
     """
     fig, ax = plt.subplots()
 
@@ -147,17 +146,17 @@ def plot_grouped_boxplot(
     Parameters
     ----------
     df : pd.DataFrame
-        Input dataframe.
+        dataframe.
     x_col : str
-        Column to use on the x-axis (groups/categories).
+        x-axis column.
     y_col : str
-        Column to use on the y-axis (values for boxplots).
+        y-axis column.
     xlabel : str, optional
-        Custom x-axis label. Defaults to `x_col`.
+        x-axis label. Defaults to `x_col`.
     ylabel : str, optional
-        Custom y-axis label. Defaults to `y_col`.
+        y-axis label. Defaults to `y_col`.
     title : str, optional
-        Plot title. Defaults to 'Box Plot of <y_col> by <x_col>'.
+        title. Defaults to 'Box Plot of <y_col> by <x_col>'.
     """
     plt.figure(figsize=(12, 5))
 
@@ -179,7 +178,7 @@ def plot_value_counts(
     ylabel: str | None = "Count",
 ) -> None:
     """
-    Plot a bar chart of value counts for a categorical variable.
+    bar chart of value counts for categorical variables.
 
     Args:
         df (pd.DataFrame): Input DataFrame.
@@ -212,18 +211,18 @@ def plot_kde_by_group(
     title: Optional[str] = None,
 ) -> None:
     """
-    Plot kernel density estimates of a numeric column, grouped by another column.
+    Plot KDE of column, grouped by another column.
 
     Parameters
     ----------
     df : pd.DataFrame
         Input dataframe.
     value_col : str
-        Numeric column to plot the KDE for (e.g. 'log_Price').
+        column to plot the KDE for.
     group_col : str
-        Column to group by (e.g. 'Year' or 'Year_binary').
+        Column to group by
     xlabel : str, optional
-        Label for the x-axis. Defaults to value_col.
+        x-axis label. Defaults to value_col.
     ylabel : str, optional
         Label for the y-axis. Defaults to 'Density'.
     title : str, optional
@@ -255,7 +254,7 @@ def plot_barchart(
     ylabel: Optional[str] = "Frequency",
 ) -> None:
     """
-    Plot a bar chart of value counts for a column.
+    bar chart of value counts for a column.
 
     Parameters
     ----------
@@ -295,16 +294,16 @@ def plot_kde(
     ylabel: Optional[str] = "Density",
 ) -> None:
     """
-    Plot a kernel density estimate (KDE) for a numeric column.
+    Plot a KDE for a numeric column.
 
     Parameters
     ----------
     df : pd.DataFrame
         Input dataframe.
     column : str
-        Numeric column to plot.
+        column to plot.
     title : str, optional
-        Plot title. Defaults to 'KDE of <column>'.
+        title. Defaults to 'KDE of <column>'.
     xlabel : str, optional
         x-axis label. Defaults to column name.
     ylabel : str, optional
@@ -337,11 +336,11 @@ def plot_faceted_kde(
 
     Args:
         df (pd.DataFrame): Input dataframe.
-        numeric_col (str): Numeric column to plot (e.g. YearBuilt).
-        facet_col (str): Categorical column to facet by (e.g. CouncilArea).
-        col_wrap (int, optional): Number of facets per row. Default is 4.
-        height (float, optional): Height of each facet. Default is 2.5.
-        aspect (float, optional): Aspect ratio of each facet. Default is 1.2.
+        numeric_col (str): Numeric column to plot
+        facet_col (str): Categorical column .
+        col_wrap (int, optional): Number of facets per row.
+        height (float, optional): Height of each facet.
+        aspect (float, optional): Aspect ratio of each facet.
     """
     sns.displot(
         data=df.dropna(subset=[numeric_col]),
@@ -366,13 +365,13 @@ def plot_missing_proportion(
     title: Optional[str] = None,
 ) -> None:
     """
-    Plot the proportion of missing values in a column, grouped by another column.
+    Plot proportion of missing values in a column, grouped by another column.
 
     Args:
         df (pd.DataFrame): Input dataframe.
-        group_col (str): Column to group by (e.g. CouncilArea).
-        missing_col (str): Binary missingness indicator (e.g. Missing_YearBuilt).
-        title (str, optional): Plot title.
+        group_col (str): Column to group by.
+        missing_col (str): Binary missingness indicator.
+        title (str, optional):  title.
     """
     prop_missing = (
         df.groupby(group_col)[missing_col]
@@ -440,17 +439,16 @@ def plot_cramerv_matrix(
     figsize: tuple = (10, 8),
 ) -> plt.Figure:
     """
-    Plot a Cramér's V correlation matrix for categorical variables.
+    Plot Cramer's V correlation matrix for categorical variables.
 
     Args:
         df (pd.DataFrame): Input pandas DataFrame.
-        cols (Iterable[str], optional): Categorical columns to include.
-            If None, all object/category columns are used.
-        title (str, optional): Title of the plot.
-        figsize (tuple, optional): Figure size.
+        cols (Iterable[str], optional): columns to include.
+        title (str, optional): Title.
+        figsize (tuple, optional): size.
 
     Returns:
-        plt.Figure: Matplotlib figure object.
+        cramer V correlation matrix.
     """
     if cols is None:
         cols = df.select_dtypes(include=["object", "category"]).columns
@@ -501,11 +499,11 @@ def plot_pairplot(
     cols: list[str],
 ) -> None:
     """
-    Plot a lower-triangle pairplot with histograms on the diagonal.
+    Plot a paitplot with histograms on diagonal.
 
     Args:
         df (pd.DataFrame): Input dataframe.
-        cols (list[str]): Columns to include in the pairplot.
+        cols (list[str]): Columns in pairplot.
     """
     sns.pairplot(
         df[cols].dropna(),
@@ -525,15 +523,15 @@ def plot_spatial_scatter(
     title: Optional[str] = None,
 ) -> None:
     """
-    Plot a spatial scatter plot coloured by a numeric value.
+    Plot spatial scatter plot coloured by a numeric value.
 
     Args:
         df (pd.DataFrame): Input dataframe.
         longitude_col (str): Longitude column name.
         latitude_col (str): Latitude column name.
-        value_col (str): Numeric column used for colour (e.g. Price).
-        figsize (tuple, optional): Figure size.
-        title (str, optional): Plot title.
+        value_col (str): Numeric column used for colour .
+        figsize (tuple, optional): size.
+        title (str, optional): title.
     """
     plt.figure(figsize=figsize)
 
@@ -566,16 +564,16 @@ def plot_scatter(
     title: Optional[str] = None,
 ) -> None:
     """
-    Plot a simple scatter plot of two variables.
+    Plot scatter plot of two variables.
 
     Args:
         df (pd.DataFrame): Input dataframe.
-        x_col (str): Column for the x-axis.
-        y_col (str): Column for the y-axis.
-        xlabel (str): Label for the x-axis (required).
-        ylabel (str): Label for the y-axis (required).
-        figsize (tuple, optional): Figure size.
-        title (str, optional): Plot title.
+        x_col (str): Column- x-axis.
+        y_col (str): Column- y-axis.
+        xlabel (str): x-axis label .
+        ylabel (str): y-axis label.
+        figsize (tuple, optional): size.
+        title (str, optional): title.
     """
     plt.figure(figsize=figsize)
 

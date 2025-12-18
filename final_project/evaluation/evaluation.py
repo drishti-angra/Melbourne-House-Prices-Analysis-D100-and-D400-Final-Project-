@@ -12,18 +12,17 @@ import dalex as dx
 
 def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
     """
-    Evaluate predictions for a log-price house price model.
+    Evaluattion for a log-price model.
 
-    Reports metrics on:
     1) Log-price scale
     2) Original price scale
 
     Parameters
     ----------
     y_true_log : array-like
-        True log house prices.
+        True log prices
     y_pred_log : array-like
-        Predicted log house prices.
+        Predicted log prices.
 
     Returns
     -------
@@ -77,7 +76,7 @@ def evaluate_predictions(y_true_log, y_pred_log) -> pd.DataFrame:
 
 def plot_predicted_actual(ax, y_true, y_pred, title, xlabel, ylabel):
     """
-    Scatter plot of predicted vs actual values with a y=x reference line.
+    Scatter plot of predicted vs actual values
     """
     ax.scatter(y_pred, y_true, alpha=0.25, s=12)
 
@@ -95,11 +94,11 @@ def plot_predicted_actual(ax, y_true, y_pred, title, xlabel, ylabel):
 def dalex_explainer(model, X, y, label):
     X_dalex = X.copy()
 
-    # 1) due to "boolean value of NA Ambiguous error"
+
     X_dalex = X_dalex.apply(lambda s: s.astype(object).where(~pd.isna(s), np.nan))
     y_dalex = np.asarray(y, dtype=float)
 
-    # 2) Convert numeric columns back to numeric for PDP
+    # 2) Converting columns back to numeric so thta PDP works
     numeric_cols = [
         "Distance", "Bedroom2", "Bathroom", "Car", "Landsize", "YearBuilt",
         "Lattitude", "Longtitude",
@@ -122,7 +121,7 @@ def dalex_explainer(model, X, y, label):
 
 def feature_importance(explainer):
     """
-    Using Dalex explainer to find the feature importance (using permutation importance)
+    Dalex explainer- finding feature importance
 
     Parameters
     ----------
@@ -131,8 +130,7 @@ def feature_importance(explainer):
 
     Returns
     -------
-    dalex.model_explanations.ModelParts
-        Feature importance object.  
+    Feature importance.  
 
     """
     dalex_feature_importance = explainer.model_parts()
@@ -148,13 +146,13 @@ def plot_pdp(glm_explainer, lgbm_explainer, feature: str, variable_type: str):
     Parameters
     ----------
     glm_explainer : dx.Explainer
-        DALEX explainer for the GLM model.
+        DALEX explainer for the GLM
     lgbm_explainer : dx.Explainer
-        DALEX explainer for the LGBM model.
+        DALEX explainer for the LGBM
     feature : str
-        Feature name to plot.
+        Feature to plot.
     variable_type : {"numerical", "categorical"}
-        Explicit feature type for DALEX.
+        numerical/ categorical feature 
     """
 
     glm_pdp = glm_explainer.model_profile(variables=[feature], type="partial", variable_type =variable_type)
@@ -169,19 +167,19 @@ def plot_pdp(glm_explainer, lgbm_explainer, feature: str, variable_type: str):
 
 def lorenz_curve(y_true, y_pred):
     """
-    Lorenz curve for regression without exposure weights.
+    Lorenz curve (no exposure weights)
 
     Parameters
     ----------
-    y_true : array-like
-        True values
-    y_pred : array-like
-        Predicted values
+    y_true
+        true values
+    y_pred 
+        predicted value
 
     Returns
     -------
     cumulated_samples : np.ndarray
-        Cumulative share of samples (0..1)
+        Cumulative share of sample
     cumulated_true : np.ndarray
         Cumulative share of total y_true captured when sorting by y_pred
     """
@@ -202,19 +200,18 @@ def lorenz_curve(y_true, y_pred):
 
 def plot_lorenz(y_true, glm_pred_log, lgbm_pred_log, xtitle):
     """
-    Plot Lorenz curves for GLM and LGBM 
+    lorenz curves for GLM and LGBM 
 
     Parameters
     ----------
-    y_true_log : array-like
-        True log(price).
-    glm_pred_log : array-like
-        Predicted log(price) from GLM.
+    y_true_log 
+        True log(price)
+    glm_pred_log 
+        Predicted log(price)- GLM.
     lgbm_pred_log : array-like
-        Predicted log(price) from LGBM.
+        Predicted log(prices)- LGBM.
     xtitle: str
-        title of the graph 
-
+        title
     """
     y_true = np.asarray(y_true, dtype=float)
     glm_pred_log = np.asarray(glm_pred_log, dtype=float)

@@ -8,8 +8,8 @@ import pandas as pd
 
 def pipeline_glm() -> Pipeline:
     """
-    Defines the pipeline for GLM model. 
-    The Gaussian GLM with identity link on log Prices is chosen.
+    Pipeline for GLM. 
+    Gaussian GLM with identity link on log Prices.
     This is MSE loss function on log Prices
     """
 
@@ -37,7 +37,7 @@ def tuning_glm(
         ) -> Pipeline:
     
     """
-    Tuning to find the right degree of regularisation for the GLM model.
+    Hyperparameter tuning to find the right degree of regularisation for the GLM model
 
     Parameters
     ----------
@@ -46,17 +46,16 @@ def tuning_glm(
     y_training : pd.Series
         Training target.
     chosen_pipeline : Pipeline
-        A scikit-learn Pipeline.
+        Pipeline.
     cv_folds : int, default=5
-        Number of cross-validation folds.
+        No. of cross-validation folds
     random_state: int, default = 42
-        For reproducibility of results.
 
 
     Returns
     -------
     Pipeline
-        Best GLM pipeline after tuning
+        Best GLM pipeline
 
     """
 
