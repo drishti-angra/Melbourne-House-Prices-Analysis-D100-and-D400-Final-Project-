@@ -4,7 +4,7 @@ BGN 1955C
 
 
 ## Installation Instructions 
-To install the package, first ensure you are in the parent directory (project root): `d100_d400_code_1955C`
+To install the package, first ensure you are in the parent directory (project root)
 
 ### Then create and activate the virtual environment: 
 
